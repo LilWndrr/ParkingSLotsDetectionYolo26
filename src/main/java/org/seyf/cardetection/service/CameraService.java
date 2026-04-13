@@ -13,16 +13,17 @@ public class CameraService {
 
     private final CameraRepository cameraRepository;
 
-    public boolean save(Camera camera) {
-        try {
-            cameraRepository.save(camera);
-        }catch (Exception e){
-            return false;
-        }
-        return true;
+    public Camera save(Camera camera) {
+
+        return     cameraRepository.save(camera);
+
     }
 
     public Optional<Camera> getCamera(String id) {
         return cameraRepository.findById(id);
+    }
+
+    public Optional<Camera> getByName(String name){
+        return cameraRepository.findByName(name);
     }
 }

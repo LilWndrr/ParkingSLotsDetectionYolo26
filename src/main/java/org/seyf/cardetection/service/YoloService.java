@@ -93,7 +93,9 @@ public class YoloService {
     @RabbitListener(queues = "${queue.name}",concurrency = "2-4")
     public void processAndSaveCars(@Payload byte[] imageBytes,
                                    @Header("camera_id") String cameraId,
-                                   @Header("timestamp") Long timestamp) {
+                                   @Header("timestamp") Long timestamp,
+                                   @Header("parking_name") String parkingName,
+                                   @Header("ground_level_id") String groundLevel) {
 
         long startTime = System.nanoTime();
 
@@ -104,7 +106,7 @@ public class YoloService {
         // 1. LAZY LOAD SLOTS (Hits database ONCE per camera, then caches in RAM forever)
         List<Slot> slots = cameraSlotCache.computeIfAbsent(cameraId, id -> {
             System.out.println("Fetching static slots for Camera " + id + " from PostgreSQL...");
-            Camera cam = cameraService.getCamera(id)
+            Camera cam = cameraService.getByName(id)
                     .orElseThrow(() -> new IllegalStateException("Camera not found: " + id));
             return slotService.getByCamera(cam).orElse(Collections.emptyList());
         });
@@ -192,9 +194,9 @@ public class YoloService {
                 detectionCount++;}
             }
 
-            // 7. REDIS DELTA CHECK & DRAWING
-            // 7. REDIS DELTA CHECK & DRAWING (With Debouncing)
-            String redisKey = "camera:" + cameraId + ":slots";
+
+
+            String redisKey ="parking:" +parkingName + ":ground_level:" + groundLevel + ":camera:" + cameraId + ":slots";
             Map<Object, Object> currentRedisState = redisTemplate.opsForHash().entries(redisKey);
             Map<String, Object> stateChanges = new HashMap<>();
 
@@ -208,7 +210,7 @@ public class YoloService {
                         .anyMatch(carPt -> Imgproc.pointPolygonTest(contour, carPt, false) >= 0);
 
                 boolean isDetectedEmpty = !isDetectedOccupied;
-                String slotField = String.valueOf(slot.getId());
+                String slotField = slot.getName();
                 String transitionKey = cameraId + "_" + slotField;
 
                 // Look up the OFFICIAL state in Redis

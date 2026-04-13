@@ -2,6 +2,7 @@ package org.seyf.cardetection.service;
 
 import lombok.AllArgsConstructor;
 import org.seyf.cardetection.model.Camera;
+import org.seyf.cardetection.model.GroundLevel;
 import org.seyf.cardetection.model.Slot;
 import org.seyf.cardetection.repository.CameraRepository;
 import org.seyf.cardetection.repository.SlotRepository;
@@ -41,6 +42,8 @@ public class SlotService {
     }
 
 
+    public Optional<Slot> getByNameAndLevel(String slotName, GroundLevel level) {
 
-
+        return slotRepository.getByNameAndLevel(slotName, level);
+    }
 }

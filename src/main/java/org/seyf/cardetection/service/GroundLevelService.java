@@ -1,0 +1,33 @@
+package org.seyf.cardetection.service;
+
+
+import lombok.AllArgsConstructor;
+import org.seyf.cardetection.model.GroundLevel;
+import org.seyf.cardetection.repository.GroundLevelRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+@AllArgsConstructor
+public class GroundLevelService {
+    private final GroundLevelRepository groundLevelRepository;
+
+
+    public Optional<GroundLevel> get(String id){
+        return groundLevelRepository.findById(id);
+    }
+
+    public GroundLevel save(GroundLevel groundLevel){
+
+       return      groundLevelRepository.save(groundLevel);
+
+
+
+
+    }
+
+    public Optional<GroundLevel> getByName(String name) {
+        return groundLevelRepository.findByName(name);
+    }
+}

@@ -23,12 +23,14 @@ public class IngestionService {
         this.queueName = queueName;
     }
 
-    public boolean sendToMessageBroker(MultipartFile file,String cameraId,Long timestamp) {
+    public boolean sendToMessageBroker(MultipartFile file,String cameraId,Long timestamp,String parkingName,String groundLevel) {
 
        try {
            Message message = MessageBuilder.withBody(file.getBytes())
                    .setHeader("camera_id", cameraId)
                    .setHeader("timestamp", timestamp)
+                   .setHeader("parking_name",parkingName)
+                   .setHeader("ground_level_id",groundLevel)
                    .setContentType(MessageProperties.CONTENT_TYPE_BYTES).build();
 
            amqpTemplate.send(queueName,message);

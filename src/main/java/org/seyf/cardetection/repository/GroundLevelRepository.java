@@ -1,13 +1,13 @@
 package org.seyf.cardetection.repository;
 
-import org.seyf.cardetection.model.Camera;
+import org.seyf.cardetection.model.GroundLevel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface CameraRepository extends JpaRepository<Camera, String> {
+public interface GroundLevelRepository extends JpaRepository<GroundLevel,String> {
 
-    Optional<Camera> findByName(String name);
+    Optional<GroundLevel> findByName(String name);
 }

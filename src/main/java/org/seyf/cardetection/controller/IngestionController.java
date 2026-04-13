@@ -21,8 +21,11 @@ public class IngestionController {
     @PostMapping("/forward")
     public ResponseEntity<String> forward (@RequestParam("file") MultipartFile file,
                                            @RequestParam("camera_id") String cameraId,
-                                           @RequestParam("timestamp") Long timestamp){
-          if(ingestionService.sendToMessageBroker(file,cameraId,timestamp))  {
+                                           @RequestParam("timestamp") Long timestamp,
+                                           @RequestParam("parking_name" )String parkingName,
+                                           @RequestParam("ground_level_id") String groundLevel)
+    {
+          if(ingestionService.sendToMessageBroker(file,cameraId,timestamp,parkingName,groundLevel))  {
                 return  ResponseEntity.ok().body("File forwarded successfully");
           }
 
