@@ -244,7 +244,7 @@ public class YoloService {
                         officialIsEmpty = isDetectedEmpty;
 
 
-                        Message message = Message.builder().slotId(slotField).isEmpty(officialIsEmpty).build();
+                        Message message = Message.builder().slotId(slotField).groundLevelName(groundLevel).parkingName(parkingName).isEmpty(officialIsEmpty).build();
                         messagingTemplate.convertAndSend("/topic/parking-updates",message);
                         // Reset tracker now that the state has successfully changed
                         transition.count = 0;

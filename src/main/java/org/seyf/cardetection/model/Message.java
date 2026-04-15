@@ -13,6 +13,9 @@ import org.hibernate.annotations.BatchSize;
 @Builder
 public class Message {
 
+    private String parkingName;
+    private String groundLevelName;
     private String slotId;
+
     private Boolean isEmpty;
 }

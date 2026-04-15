@@ -17,4 +17,6 @@ public interface SlotRepository extends JpaRepository<Slot, String> {
 
 
     Optional<Slot> getByNameAndLevel(String name, GroundLevel level);
+
+    List<Slot> findAllByLevel(GroundLevel level);
 }

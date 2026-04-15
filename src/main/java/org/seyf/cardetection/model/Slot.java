@@ -34,6 +34,10 @@ public class Slot {
     @JdbcTypeCode(SqlTypes.JSON)
     private List<List<Double>> points;
 
+    @Column(name = "map_points")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private List<List<Double>> mapPoints;
+
     @ManyToOne
     @JoinColumn(name = "camera_id")
     @JsonBackReference

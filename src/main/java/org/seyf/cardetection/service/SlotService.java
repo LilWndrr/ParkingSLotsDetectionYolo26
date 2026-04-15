@@ -46,4 +46,8 @@ public class SlotService {
 
         return slotRepository.getByNameAndLevel(slotName, level);
     }
+
+    public List<Slot> getByGrounfLevel(GroundLevel groundLevel) {
+        return slotRepository.findAllByLevel(groundLevel);
+    }
 }

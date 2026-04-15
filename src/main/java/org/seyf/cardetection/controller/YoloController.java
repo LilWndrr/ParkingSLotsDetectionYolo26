@@ -62,4 +62,15 @@ public class YoloController {
         }
     }
 
+    @PostMapping("/saveMap")
+    public ResponseEntity<String> saveMapSlots(@RequestBody JsonNode input) {
+        try {
+            slotImportService.insertMapSlotsCoordinates(input);
+            return ResponseEntity.ok("Slots saved successfully!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Failed to save slots: " + e.getMessage());
+        }
+    }
+
 }

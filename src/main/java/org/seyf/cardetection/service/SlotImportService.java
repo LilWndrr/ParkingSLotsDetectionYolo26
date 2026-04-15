@@ -84,4 +84,52 @@ public class SlotImportService {
             slotService.addSlot(slot); // Save or Update
         });
     }
+
+    @Transactional
+    public void insertMapSlotsCoordinates (JsonNode input){
+
+        // 1. TIER 1 BATCH CACHE (Prevents database hammering)
+        Map<String, Parking> parkingCache = new HashMap<>();
+        Map<String, GroundLevel> levelCache = new HashMap<>();
+        Map<String, Camera> cameraCache = new HashMap<>();
+
+        input.forEach(node -> {
+
+
+            String parkingName = node.get("parking_name").asString();
+
+            // 2. SMART LOOKUP: Check RAM first. If not in RAM, check DB. If not in DB, create it.
+            Parking parking = parkingCache.computeIfAbsent(parkingName, name ->
+                    parkingService.getByName(name).orElseGet(() -> {
+                        Parking newParking = Parking.builder().name(name).build();
+                        return parkingService.save(newParking); // Assuming save() returns the saved entity
+                    })
+            );
+
+            String groundLevelName = node.get("level_id").asString();
+            GroundLevel level = levelCache.computeIfAbsent(groundLevelName, name ->
+                    groundLevelService.getByName(name).orElseGet(() -> {
+                        GroundLevel newLevel = GroundLevel.builder().name(name).parking(parking).build();
+                        return groundLevelService.save(newLevel);
+                    })
+            );
+
+
+
+            // 3. Extract points safely
+            List<List<Double>> points = new ArrayList<>();
+            node.get("points").forEach(pointNode -> {
+                List<Double> coordinate = new ArrayList<>();
+                pointNode.forEach(coord -> coordinate.add(coord.asDouble()));
+                points.add(coordinate);
+            });
+
+
+            String slotName = node.get("name").asString();
+            Slot slot = slotService.getByNameAndLevel(slotName, level).orElse(new Slot());
+
+            slot.setMapPoints(points);
+            slotService.addSlot(slot); // Save or Update
+        });
+    }
 }

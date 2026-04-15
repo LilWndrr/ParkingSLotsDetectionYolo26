@@ -6,6 +6,7 @@ import org.seyf.cardetection.model.Parking;
 import org.seyf.cardetection.repository.ParkingRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,8 +22,11 @@ public class ParkingService {
 
     public Parking save (Parking parking){
 
-
          return  parkingRepository.save(parking);
 
+    }
+
+    public List<Parking> getAllParkings(){
+        return  parkingRepository.findAll();
     }
 }

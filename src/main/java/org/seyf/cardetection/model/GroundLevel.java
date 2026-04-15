@@ -37,4 +37,7 @@ public class GroundLevel {
     @OneToMany(mappedBy = "level") // OPTIONAL: Good for fetching all slots on a level
     private List<Slot> slots;
 
+    @Column(name = "map_image_url")
+    private String mapImageUrl;
+
 }

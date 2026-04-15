@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface GroundLevelRepository extends JpaRepository<GroundLevel,String> {
 
     Optional<GroundLevel> findByName(String name);
+    Optional<GroundLevel> findByParking_IdAndName(String parkingId, String name);
 }

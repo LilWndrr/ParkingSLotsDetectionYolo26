@@ -30,4 +30,8 @@ public class GroundLevelService {
     public Optional<GroundLevel> getByName(String name) {
         return groundLevelRepository.findByName(name);
     }
+
+    public Optional<GroundLevel> getByParkingIdAndName(String parkingId, String name){
+        return groundLevelRepository.findByParking_IdAndName(parkingId, name);
+    }
 }
