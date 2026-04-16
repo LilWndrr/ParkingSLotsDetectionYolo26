@@ -1,10 +1,7 @@
 package org.seyf.cardetection.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -23,5 +20,6 @@ public class Parking {
 
 
     @OneToMany(mappedBy = "parking")
+    @ToString.Exclude
     private List<GroundLevel> groundLevels;
 }

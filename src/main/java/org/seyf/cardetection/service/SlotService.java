@@ -50,4 +50,9 @@ public class SlotService {
     public List<Slot> getByGrounfLevel(GroundLevel groundLevel) {
         return slotRepository.findAllByLevel(groundLevel);
     }
+
+    public void saveAll(List<Slot> stateChangedSlots) {
+        slotRepository.saveAll(stateChangedSlots);
+
+    }
 }

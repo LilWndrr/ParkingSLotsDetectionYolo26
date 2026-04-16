@@ -8,6 +8,7 @@ import org.seyf.cardetection.model.GroundLevel;
 import org.seyf.cardetection.model.Parking;
 import org.seyf.cardetection.model.Slot;
 import org.seyf.cardetection.service.GroundLevelService;
+import org.seyf.cardetection.service.OccupancySnapshotService;
 import org.seyf.cardetection.service.ParkingService;
 import org.seyf.cardetection.service.SlotService;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -24,13 +25,14 @@ import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/v1/diplay")
+@RequestMapping("/api/v1/display")
 public class FrontEndController {
 
 
     private final SlotService slotService;
     private final GroundLevelService groundLevelService;
     private final ParkingService parkingService;
+    private final OccupancySnapshotService snapshotService;
     private final RedisTemplate<String,Object> redisTemplate;
 
     @GetMapping("/map")
@@ -60,7 +62,7 @@ public class FrontEndController {
         }
 
         List<SlotFrontendRequestDto> slotsDto = slotService.getByGrounfLevel(groundLevel).stream().map(slot -> {
-            boolean currentLiveState = liveSlotsStates.get(slot.getName());
+            boolean currentLiveState = liveSlotsStates.getOrDefault(slot.getName(),true);
 
             return SlotFrontendRequestDto.builder()
                     .name(slot.getName())
@@ -71,6 +73,7 @@ public class FrontEndController {
 
         MapRequestDto mapRequestDto = MapRequestDto.builder()
                 .slots(slotsDto)
+                .occupancyRate(snapshotService.getOccupancyRateByGroundLevel(groundLevel.getId()))
                 .mapImageUrl(groundLevel.getMapImageUrl())
                 .build();
 

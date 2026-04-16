@@ -25,6 +25,7 @@ public class Camera {
     @OneToMany(mappedBy = "camera")
     @JsonManagedReference
     @Builder.Default
+    @ToString.Exclude
     private List<Slot> slots = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

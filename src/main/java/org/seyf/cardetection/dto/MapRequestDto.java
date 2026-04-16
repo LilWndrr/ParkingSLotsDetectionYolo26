@@ -14,6 +14,6 @@ public class MapRequestDto {
 
     private String mapImageUrl;
     private List<SlotFrontendRequestDto> slots ;
-
+    private double occupancyRate;
 
 }

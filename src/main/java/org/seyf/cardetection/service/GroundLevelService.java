@@ -6,6 +6,7 @@ import org.seyf.cardetection.model.GroundLevel;
 import org.seyf.cardetection.repository.GroundLevelRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,8 +24,6 @@ public class GroundLevelService {
        return      groundLevelRepository.save(groundLevel);
 
 
-
-
     }
 
     public Optional<GroundLevel> getByName(String name) {
@@ -33,5 +32,9 @@ public class GroundLevelService {
 
     public Optional<GroundLevel> getByParkingIdAndName(String parkingId, String name){
         return groundLevelRepository.findByParking_IdAndName(parkingId, name);
+    }
+
+    public List<GroundLevel> getAll(){
+        return groundLevelRepository.findAll();
     }
 }

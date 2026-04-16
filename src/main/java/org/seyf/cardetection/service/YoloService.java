@@ -97,6 +97,12 @@ public class YoloService {
                                    @Header("parking_name") String parkingName,
                                    @Header("ground_level_id") String groundLevel) {
 
+        long delay = System.currentTimeMillis() - timestamp;
+        if (delay > 5000) {
+            System.out.println("Frame is " + delay + "ms old. Dropping to catch up!");
+            return;
+        }
+
         long startTime = System.nanoTime();
 
         if (session == null) {
@@ -199,7 +205,7 @@ public class YoloService {
             String redisKey ="parking:" +parkingName + ":ground_level:" + groundLevel + ":camera:" + cameraId + ":slots";
             Map<Object, Object> currentRedisState = redisTemplate.opsForHash().entries(redisKey);
             Map<String, Object> stateChanges = new HashMap<>();
-
+            List<Slot> stateChangedSlots= new ArrayList<>();
             for (Slot slot : slots) {
                 MatOfPoint2f contour = slotContours.get(slot);
 
@@ -243,6 +249,8 @@ public class YoloService {
                         // Update our local official state so the drawing logic below updates instantly
                         officialIsEmpty = isDetectedEmpty;
 
+                        slot.setEmpty(isDetectedEmpty);
+                        stateChangedSlots.add(slot);
 
                         Message message = Message.builder().slotId(slotField).groundLevelName(groundLevel).parkingName(parkingName).isEmpty(officialIsEmpty).build();
                         messagingTemplate.convertAndSend("/topic/parking-updates",message);
@@ -260,6 +268,11 @@ public class YoloService {
                 Imgproc.polylines(frame, List.of(slotMats.get(slot)), true, color, 1);
 
 
+            }
+
+            if(!stateChangedSlots.isEmpty()){
+
+                slotService.saveAll(stateChangedSlots);
             }
 
             // 8. BATCH UPDATE REDIS
@@ -301,11 +314,7 @@ public class YoloService {
 
             long spendedTime= System.nanoTime()-startTime;
 
-            long delay = System.currentTimeMillis() - timestamp;
-            if (delay > 5000) {
-                System.out.println("Frame is " + delay + "ms old. Dropping to catch up!");
-                return;
-            }
+
             System.out.println(spendedTime);
         }
     }

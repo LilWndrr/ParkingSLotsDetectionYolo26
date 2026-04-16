@@ -2,10 +2,7 @@ package org.seyf.cardetection.model;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 
 import java.util.List;
@@ -32,9 +29,11 @@ public class GroundLevel {
 
 
     @OneToMany(mappedBy = "level")
+    @ToString.Exclude
     private List<Camera> cameras;
 
     @OneToMany(mappedBy = "level") // OPTIONAL: Good for fetching all slots on a level
+    @ToString.Exclude
     private List<Slot> slots;
 
     @Column(name = "map_image_url")
