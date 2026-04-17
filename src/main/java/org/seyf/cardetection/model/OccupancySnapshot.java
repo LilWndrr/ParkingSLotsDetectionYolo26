@@ -1,5 +1,7 @@
 package org.seyf.cardetection.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.stereotype.Indexed;
@@ -23,6 +25,7 @@ public class OccupancySnapshot {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ground_level_id", nullable = false)
+    @JsonIgnore
     private GroundLevel groundLevel;
 
     private int totalSlots;

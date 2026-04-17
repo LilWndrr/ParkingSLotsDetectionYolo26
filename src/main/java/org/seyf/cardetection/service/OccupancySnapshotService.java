@@ -1,7 +1,10 @@
 package org.seyf.cardetection.service;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.seyf.cardetection.dto.DateRequestDto;
+import org.seyf.cardetection.dto.HourlyOccupancy;
 import org.seyf.cardetection.model.Camera;
 import org.seyf.cardetection.model.GroundLevel;
 import org.seyf.cardetection.model.OccupancySnapshot;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +31,7 @@ public class OccupancySnapshotService {
 
 
 
-    @Scheduled(fixedRate = 15000)
+    @Scheduled(fixedRate = 300000)
     @Transactional
     public void recordAndBroadcastSnapshot(){
         log.info("Start occupancyRate record");
@@ -82,6 +86,19 @@ public class OccupancySnapshotService {
 
         return snapshot != null ? snapshot.getOccupancyRate() : 0;
 
+    }
+
+    public List<HourlyOccupancy >  getHourlyOccupancy(){
+        return occupancySnapshotRepository.findAverageOccupancyByHour();
+    }
+
+    public List<OccupancySnapshot> getByTimeInterval(String groundLevelId, DateRequestDto date){
+        GroundLevel level = levelService.get(groundLevelId).orElse(null);
+        if(level==null){
+            return new ArrayList<>();
+        }
+
+        return occupancySnapshotRepository.findByGroundLevelAndRecordedAtBetween(level,date.getFrom().atStartOfDay(),date.getTo().atTime(12,0));
     }
 
 
