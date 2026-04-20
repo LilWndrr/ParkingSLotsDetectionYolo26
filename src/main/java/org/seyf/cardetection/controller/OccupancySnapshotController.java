@@ -1,8 +1,9 @@
-package org.seyf.cardetection.config;
+package org.seyf.cardetection.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.seyf.cardetection.dto.DateRequestDto;
 import org.seyf.cardetection.dto.HourlyOccupancy;
+import org.seyf.cardetection.dto.OccupancyFlatData;
 import org.seyf.cardetection.dto.SnapshotResponseDto;
 import org.seyf.cardetection.model.OccupancySnapshot;
 import org.seyf.cardetection.service.OccupancySnapshotService;
@@ -19,21 +20,34 @@ public class OccupancySnapshotController {
     private final OccupancySnapshotService snapshotService;
 
     @GetMapping("/byHour")
-    public ResponseEntity<?> getHourlyOccupancy(){
+    public ResponseEntity<?> getHourlyOccupancy(@RequestParam("ground_level_id") String levelId){
 
-        List<HourlyOccupancy> hourlyOccupancies = snapshotService.getHourlyOccupancy();
+        List<HourlyOccupancy> hourlyOccupancies = snapshotService.getHourlyOccupancy(levelId);
         if(hourlyOccupancies.isEmpty()){
-            return ResponseEntity.badRequest().body("Smth Went Wrong");
+            return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok(hourlyOccupancies);
 
     }
+    @GetMapping("/byHourAndDayOfWeek")
+    public ResponseEntity<?> getHourlyOccupancyByDayOfWeek(@RequestParam("ground_level_id") String levelId){
+
+        List<OccupancyFlatData> hourlyOccupancies = snapshotService.getHourlyOccupancyByDayOfWeek(levelId);
+        if(hourlyOccupancies.isEmpty()){
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(hourlyOccupancies);
+
+    }
+
+
     @PostMapping("/byTimeInterval")
     public ResponseEntity<?> getByTimeInterval(@RequestParam("ground_level_id")String groundLevelId, @RequestBody DateRequestDto dateRequestDto){
         List<OccupancySnapshot> snapshots = snapshotService.getByTimeInterval(groundLevelId,dateRequestDto);
         if(snapshots.isEmpty()){
-            return ResponseEntity.badRequest().body("There is no records at this time interval");
+             return ResponseEntity.noContent().build();
         }
 
         return ResponseEntity.ok(snapshots.stream().map(SnapshotResponseDto::toDto).toList());

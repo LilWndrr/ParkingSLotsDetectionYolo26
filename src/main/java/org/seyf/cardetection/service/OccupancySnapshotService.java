@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.seyf.cardetection.dto.DateRequestDto;
 import org.seyf.cardetection.dto.HourlyOccupancy;
+import org.seyf.cardetection.dto.OccupancyFlatData;
 import org.seyf.cardetection.model.Camera;
 import org.seyf.cardetection.model.GroundLevel;
 import org.seyf.cardetection.model.OccupancySnapshot;
@@ -81,6 +82,7 @@ public class OccupancySnapshotService {
         GroundLevel groundLevel = levelService.get(groundLevelId).orElse(null);
         if(groundLevel==null){
             log.info("Ground level is not exist");
+            return 0;
         }
         OccupancySnapshot snapshot= occupancySnapshotRepository.findFirstByGroundLevelOrderByRecordedAtDesc(groundLevel).orElse(null);
 
@@ -88,8 +90,13 @@ public class OccupancySnapshotService {
 
     }
 
-    public List<HourlyOccupancy >  getHourlyOccupancy(){
-        return occupancySnapshotRepository.findAverageOccupancyByHour();
+    public List<HourlyOccupancy >  getHourlyOccupancy(String groundLevelId){
+        GroundLevel groundLevel = levelService.get(groundLevelId).orElse(null);
+        if(groundLevel==null){
+            log.info("Ground level is not exist");
+            return new ArrayList<>();
+        }
+        return occupancySnapshotRepository.findAverageOccupancyByHour(groundLevel);
     }
 
     public List<OccupancySnapshot> getByTimeInterval(String groundLevelId, DateRequestDto date){
@@ -98,7 +105,16 @@ public class OccupancySnapshotService {
             return new ArrayList<>();
         }
 
-        return occupancySnapshotRepository.findByGroundLevelAndRecordedAtBetween(level,date.getFrom().atStartOfDay(),date.getTo().atTime(12,0));
+        return occupancySnapshotRepository.findByGroundLevelAndRecordedAtBetween(level,date.getFrom().atStartOfDay(),date.getTo().plusDays(1).atStartOfDay() );
+    }
+
+    public List<OccupancyFlatData> getHourlyOccupancyByDayOfWeek(String groundLevelId){
+        GroundLevel groundLevel = levelService.get(groundLevelId).orElse(null);
+        if(groundLevel==null){
+            log.info("Ground level is not exist");
+            return new ArrayList<>();
+        }
+        return occupancySnapshotRepository.findAverageOccupancyByDayOfWeekAndHour(groundLevel);
     }
 
 

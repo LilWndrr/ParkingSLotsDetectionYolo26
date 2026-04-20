@@ -6,9 +6,7 @@ import lombok.AllArgsConstructor;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-import org.seyf.cardetection.model.Camera;
-import org.seyf.cardetection.model.Message;
-import org.seyf.cardetection.model.Slot;
+import org.seyf.cardetection.model.*;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,6 +19,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,6 +29,8 @@ public class YoloService {
 
     private final SlotService slotService;
     private final CameraService cameraService;
+    private final SlotEventService eventService;
+    private final GroundLevelService groundLevelService;
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final SimpMessagingTemplate messagingTemplate;
@@ -57,9 +58,11 @@ public class YoloService {
     private OrtEnvironment env;
     private OrtSession     session;
 
-    public YoloService(SlotService slotService, CameraService cameraService, RedisTemplate<String, Object> redisTemplate, SimpMessagingTemplate messagingTemplate) {
+    public YoloService(SlotService slotService, CameraService cameraService, SlotEventService eventService, GroundLevelService groundLevelService, RedisTemplate<String, Object> redisTemplate, SimpMessagingTemplate messagingTemplate) {
         this.slotService = slotService;
         this.cameraService = cameraService;
+        this.eventService = eventService;
+        this.groundLevelService = groundLevelService;
         this.redisTemplate = redisTemplate;
         this.messagingTemplate = messagingTemplate;
     }
@@ -206,6 +209,7 @@ public class YoloService {
             Map<Object, Object> currentRedisState = redisTemplate.opsForHash().entries(redisKey);
             Map<String, Object> stateChanges = new HashMap<>();
             List<Slot> stateChangedSlots= new ArrayList<>();
+            List<SlotEvent> events = new ArrayList<>();
             for (Slot slot : slots) {
                 MatOfPoint2f contour = slotContours.get(slot);
 
@@ -250,7 +254,19 @@ public class YoloService {
                         officialIsEmpty = isDetectedEmpty;
 
                         slot.setEmpty(isDetectedEmpty);
-                        stateChangedSlots.add(slot);
+
+
+
+
+                            events.add(SlotEvent.builder().occurredAt(LocalDateTime.now())
+                                    .slotName(slot.getName())
+                                    .cameraName(slot.getCamera().getName())
+                                    .groundLevel(slot.getLevel())
+                                    .parkingName(parkingName)
+                                    .dayOfWeek(LocalDateTime.now().getDayOfWeek().getValue())
+                                    .hourOfDay(LocalDateTime.now().getHour())
+                                    .isEmpty(isDetectedEmpty).build());
+                            stateChangedSlots.add(slot);
 
                         Message message = Message.builder().slotId(slotField).groundLevelName(groundLevel).parkingName(parkingName).isEmpty(officialIsEmpty).build();
                         messagingTemplate.convertAndSend("/topic/parking-updates",message);
@@ -273,7 +289,10 @@ public class YoloService {
             if(!stateChangedSlots.isEmpty()){
 
                 slotService.saveAll(stateChangedSlots);
+                eventService.saveAll(events);
+
             }
+
 
             // 8. BATCH UPDATE REDIS
             if (!stateChanges.isEmpty()) {
