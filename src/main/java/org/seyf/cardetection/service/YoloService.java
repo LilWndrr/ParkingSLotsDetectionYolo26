@@ -30,7 +30,7 @@ public class YoloService {
     private final SlotService slotService;
     private final CameraService cameraService;
     private final SlotEventService eventService;
-    private final GroundLevelService groundLevelService;
+
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final SimpMessagingTemplate messagingTemplate;
@@ -58,11 +58,10 @@ public class YoloService {
     private OrtEnvironment env;
     private OrtSession     session;
 
-    public YoloService(SlotService slotService, CameraService cameraService, SlotEventService eventService, GroundLevelService groundLevelService, RedisTemplate<String, Object> redisTemplate, SimpMessagingTemplate messagingTemplate) {
+    public YoloService(SlotService slotService, CameraService cameraService, SlotEventService eventService, RedisTemplate<String, Object> redisTemplate, SimpMessagingTemplate messagingTemplate) {
         this.slotService = slotService;
         this.cameraService = cameraService;
         this.eventService = eventService;
-        this.groundLevelService = groundLevelService;
         this.redisTemplate = redisTemplate;
         this.messagingTemplate = messagingTemplate;
     }
@@ -257,14 +256,14 @@ public class YoloService {
 
 
 
-
-                            events.add(SlotEvent.builder().occurredAt(LocalDateTime.now())
+                            LocalDateTime now = LocalDateTime.now();
+                            events.add(SlotEvent.builder().occurredAt(now)
                                     .slotName(slot.getName())
                                     .cameraName(slot.getCamera().getName())
                                     .groundLevel(slot.getLevel())
                                     .parkingName(parkingName)
-                                    .dayOfWeek(LocalDateTime.now().getDayOfWeek().getValue())
-                                    .hourOfDay(LocalDateTime.now().getHour())
+                                    .dayOfWeek(now.getDayOfWeek().getValue())
+                                    .hourOfDay(now.getHour())
                                     .isEmpty(isDetectedEmpty).build());
                             stateChangedSlots.add(slot);
 

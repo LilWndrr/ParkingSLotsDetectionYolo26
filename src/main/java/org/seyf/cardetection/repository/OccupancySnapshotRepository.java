@@ -25,5 +25,5 @@ public interface OccupancySnapshotRepository extends JpaRepository<OccupancySnap
     @Query("select s.dayOfWeek as dayOfWeek  ,s.hourOfDay as hourOfDay, avg(s.occupancyRate) as averageRate from OccupancySnapshot s where s.groundLevel = :level  group by s.hourOfDay,s.dayOfWeek order by s.dayOfWeek asc")
     List<OccupancyFlatData> findAverageOccupancyByDayOfWeekAndHour(@Param("level") GroundLevel level);
 
-
+    void deleteByGroundLevel(GroundLevel groundLevel);
 }

@@ -18,4 +18,6 @@ public interface SlotEventRepository extends JpaRepository<SlotEvent,String> {
 
     @Query("select s.slotName as slotName, s.hourOfDay as hourOfDay, count (s.id) as transitionCount  from SlotEvent s where s.groundLevel=:level group by s.slotName,s.hourOfDay order by s.hourOfDay ASC")
     List<SlotTransition> countSlotEventAppearanceGroupBySlotAndByHourOfDay(@Param("level") GroundLevel level );
+
+    void deleteByGroundLevel(GroundLevel groundLevel);
 }
