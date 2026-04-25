@@ -77,17 +77,25 @@ public class YoloService {
             try (InputStream inputStream = modelResource.getInputStream()) {
                 Files.copy(inputStream, tempModelFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
+            System.out.println("[YOLO] Model copied to temp: " + tempModelFile.length() + " bytes");
 
             env = OrtEnvironment.getEnvironment();
             OrtSession.SessionOptions options = new OrtSession.SessionOptions();
-            options.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT);
-            session = env.createSession(tempModelFile.getAbsolutePath(), options);
 
-            System.out.println("YOLO26 model loaded successfully via ONNX Runtime.");
+            // CPU optimizations — use all available cores
+            int cores = Runtime.getRuntime().availableProcessors();
+            options.setIntraOpNumThreads(cores);
+            options.setInterOpNumThreads(cores);
+            options.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT);
+            options.setMemoryPatternOptimization(true);
+
+            session = env.createSession(tempModelFile.getAbsolutePath(), options);
+            System.out.println("[YOLO] Loaded with CPU (" + cores + " threads). DirectML not available in Java ONNX Runtime.");
 
         } catch (Exception e) {
-            System.err.println("Failed to load YOLO26 model: " + e.getMessage());
+            System.err.println("[YOLO] FATAL: Failed to load model: " + e.getMessage());
             e.printStackTrace();
+            throw new RuntimeException("ONNX model init failed", e);
         }
     }
 
