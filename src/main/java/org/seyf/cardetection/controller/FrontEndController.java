@@ -11,13 +11,17 @@ import org.seyf.cardetection.service.GroundLevelService;
 import org.seyf.cardetection.service.OccupancySnapshotService;
 import org.seyf.cardetection.service.ParkingService;
 import org.seyf.cardetection.service.SlotService;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +82,44 @@ public class FrontEndController {
                 .build();
 
         return ResponseEntity.ok(mapRequestDto);
+    }
+
+    /**
+     * Serves a map image file from the local filesystem.
+     * The frontend can't load file:// URLs, so this proxies the image over HTTP.
+     */
+    @GetMapping("/mapImage")
+    public ResponseEntity<Resource> getMapImage(@RequestParam("path") String path) {
+        File file = new File(path);
+
+        // If the path is a directory, find the first image file inside it
+        if (file.exists() && file.isDirectory()) {
+            File[] images = file.listFiles((dir, name) -> {
+                String lower = name.toLowerCase();
+                return lower.endsWith(".jpg") || lower.endsWith(".jpeg")
+                        || lower.endsWith(".png") || lower.endsWith(".gif")
+                        || lower.endsWith(".webp");
+            });
+            if (images == null || images.length == 0) {
+                return ResponseEntity.notFound().build();
+            }
+            file = images[0];
+        }
+
+        if (!file.exists() || !file.isFile()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        String name = file.getName().toLowerCase();
+        MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        if (name.endsWith(".png")) mediaType = MediaType.IMAGE_PNG;
+        else if (name.endsWith(".jpg") || name.endsWith(".jpeg")) mediaType = MediaType.IMAGE_JPEG;
+        else if (name.endsWith(".gif")) mediaType = MediaType.IMAGE_GIF;
+        else if (name.endsWith(".webp")) mediaType = MediaType.parseMediaType("image/webp");
+
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .body(new FileSystemResource(file));
     }
 
 }

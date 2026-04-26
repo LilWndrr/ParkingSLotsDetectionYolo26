@@ -45,6 +45,17 @@ public class GroundLevelController {
         return ResponseEntity.ok(levelResponseDto);
     }
 
+    @GetMapping("/byParking")
+    public ResponseEntity<?> getByParkingId(@RequestParam("parking_id") String id){
+        List<GroundLevelResponseDto> levels =  groundLevelService.getByParkingId(id)
+                .stream().map(GroundLevelResponseDto::toDto).toList();
+        if(levels.isEmpty()){
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(levels);
+    }
+
     /**
      * Returns all slots with their mapPoints polygon and occupancy heat intensity.
      * Used by the frontend spatial heatmap overlay.
