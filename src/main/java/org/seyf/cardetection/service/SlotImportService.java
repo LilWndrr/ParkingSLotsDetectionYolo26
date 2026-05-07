@@ -92,7 +92,7 @@ public class SlotImportService {
         Map<String, Parking> parkingCache = new HashMap<>();
         Map<String, GroundLevel> levelCache = new HashMap<>();
         Map<String, Camera> cameraCache = new HashMap<>();
-
+        List<Slot> slotList = new ArrayList<>();
         input.forEach(node -> {
 
 
@@ -129,7 +129,9 @@ public class SlotImportService {
             Slot slot = slotService.getByNameAndLevel(slotName, level).orElse(new Slot());
 
             slot.setMapPoints(points);
-            slotService.addSlot(slot); // Save or Update
+            slotList.add(slot);
+
         });
+        slotService.update(slotList);
     }
 }

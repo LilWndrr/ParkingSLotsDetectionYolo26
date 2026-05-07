@@ -18,6 +18,8 @@ public class Parking {
 
     private String name;
 
+    private Double longitude;
+    private Double latitude;
 
     @OneToMany(mappedBy = "parking")
     @ToString.Exclude

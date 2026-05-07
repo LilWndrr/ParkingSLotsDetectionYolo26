@@ -28,8 +28,9 @@ public class SlotService {
         return true;
     }
 
-    public void update(Slot slot) {
-        slotRepository.save(slot);
+    public void update(List<Slot> slots) {
+        slotRepository.saveAll(slots);
+
     }
 
     public List<Slot> getAll(){
