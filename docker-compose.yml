@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: car_detection
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  spring-backend:
+    build: .
+    ports:
+      - "8085:8085"
+    # Overriding the localhost defaults from your application.properties
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/car_detection
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - RABBITMQ_HOST=rabbitmq
+    # Ensures the databases start up before your app tries to connect
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+volumes:
+  pgdata:

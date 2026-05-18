@@ -7,10 +7,12 @@ import org.seyf.cardetection.dto.SlotMapDto;
 import org.seyf.cardetection.model.GroundLevel;
 import org.seyf.cardetection.model.Slot;
 import org.seyf.cardetection.repository.SlotEventRepository;
+import org.seyf.cardetection.service.CloudStorageService;
 import org.seyf.cardetection.service.GroundLevelService;
 import org.seyf.cardetection.service.SlotService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,7 @@ public class GroundLevelController {
     private final GroundLevelService groundLevelService;
     private final SlotService slotService;
     private final SlotEventRepository slotEventRepository;
+    private final CloudStorageService cloudStorageService;
 
     @GetMapping("/all")
     public ResponseEntity<?> getAll() {
@@ -97,5 +100,27 @@ public class GroundLevelController {
                 .toList();
 
         return ResponseEntity.ok(result);
+    }
+
+
+    @PostMapping("/{levelId}/upload-map")
+    public ResponseEntity<?> uploadFloorMap(@PathVariable String levelId, @RequestParam("file") MultipartFile file) {
+        try {
+            GroundLevel level = groundLevelService.get(levelId).orElse(null);
+            if (level == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // 1. Upload file to Cloudinary
+            String cdnUrl = cloudStorageService.uploadImage(file, "parking_maps");
+
+            // 2. Update entity property with the permanent public web URL
+            level.setMapImageUrl(cdnUrl);
+            groundLevelService.save(level);
+
+            return ResponseEntity.ok(Map.of("url", cdnUrl));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Upload failed: " + e.getMessage());
+        }
     }
 }

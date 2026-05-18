@@ -87,7 +87,7 @@ public class FrontEndController {
     /**
      * Serves a map image file from the local filesystem.
      * The frontend can't load file:// URLs, so this proxies the image over HTTP.
-     */
+     *//*
     @GetMapping("/mapImage")
     public ResponseEntity<Resource> getMapImage(@RequestParam("path") String path) {
         File file = new File(path);
@@ -120,6 +120,6 @@ public class FrontEndController {
         return ResponseEntity.ok()
                 .contentType(mediaType)
                 .body(new FileSystemResource(file));
-    }
+    }*/
 
 }
