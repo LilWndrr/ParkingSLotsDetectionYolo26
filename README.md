@@ -3,6 +3,8 @@
 
 An end-to-end intelligent parking occupancy detection and analytics system combining computer vision, asynchronous messaging architectures, and real-time dashboards. This project was developed as a graduation thesis (ENG402) for Istanbul Commerce University.
 
+You can access to CCTV simulation https://github.com/LilWndrr/Carla-Simulator-CCTV and test frontend https://github.com/LilWndrr/ParkingSLotsDetectionFrontend
+
 ---
 
 ## 📖 Table of Contents
